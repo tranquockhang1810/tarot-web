@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { AuthProvider } from "@/context/auth/useAuth";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
@@ -9,6 +9,7 @@ import { ConfigProvider } from "antd";
 import useColor from "@/hooks/useColor";
 import '@ant-design/v5-patch-for-react-19';
 import { MessageProvider } from "@/context/socket/useMessage";
+import { Suspense } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +48,9 @@ export default function RootLayout({
                   }
                 }}
               >
-                {children}
+                <Suspense>
+                  {children}
+                </Suspense>
               </ConfigProvider>
             </MessageProvider>
           </AuthProvider>

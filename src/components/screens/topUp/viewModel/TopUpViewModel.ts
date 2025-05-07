@@ -1,11 +1,9 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { PackageResponseModel } from "@/src/api/features/topUp/models/PackageModel";
-import { defaultTopUpRepo } from "@/src/api/features/topUp/TopUpRepo"
-import { useAuth } from "@/src/context/auth/useAuth";
-import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import * as Linking from "expo-linking";
-import * as WebBrowser from 'expo-web-browser';
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { PackageResponseModel } from "@/api/features/topUp/models/PackageModel";
+import { defaultTopUpRepo } from "@/api/features/topUp/TopUpRepo"
+import { useAuth } from "@/context/auth/useAuth";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 const TopUpViewModel = () => {
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
@@ -14,7 +12,9 @@ const TopUpViewModel = () => {
   const [packages, setPackages] = useState<PackageResponseModel[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageResponseModel | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const { orderId, resultCode } = useLocalSearchParams();
+  const search = useSearchParams();
+  const orderId = search.get('orderId');
+  const resultCode = search.get('resultCode');
 
   const getPackageList = async () => {
     try {
@@ -26,16 +26,14 @@ const TopUpViewModel = () => {
         setPackages([]);
         setResultObject({
           type: 'error',
-          title: localStrings.Topup.GetListPackageFailed,
-          content: res?.message
+          content: localStrings.Topup.GetListPackageFailed + ': ' + res?.message,
         })
       }
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage
       })
     } finally {
       setPackageLoading(false);
@@ -45,26 +43,24 @@ const TopUpViewModel = () => {
   const createBill = async (packageId: string) => {
     try {
       setPaymentLoading(true);
-      const returnUrl = Linking.createURL(`/(routes)/top-up`);
+      const returnUrl = window.location.origin + '/package';
       const res = await defaultTopUpRepo.createBill({
         packageId: packageId,
         returnUrl,
       });
       if (res?.code === 200 && res?.data) {
-        await WebBrowser.openAuthSessionAsync(res.data, returnUrl);
+        window.location.href = res?.data;
       } else {
         setResultObject({
           type: 'error',
-          title: localStrings.Topup.CreateBillFailed,
-          content: res?.message
+          content: localStrings.Topup.CreateBillFailed,
         })
       }
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage
       })
     } finally {
       setPaymentLoading(false);
@@ -82,13 +78,11 @@ const TopUpViewModel = () => {
         await getUser();
         setResultObject({
           type: 'success',
-          title: localStrings.Topup.CreateBillSuccess,
           content: res?.message
         })
       } else {
         setResultObject({
           type: 'error',
-          title: localStrings.Topup.CreateBillFailed,
           content: res?.message
         })
       }
@@ -96,19 +90,16 @@ const TopUpViewModel = () => {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage
       })
     } finally {
       setPaymentLoading(false);
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      getPackageList();
-    }, [])
-  )
+  useEffect(() => {
+    getPackageList();
+  }, [])
 
   useEffect(() => {
     if (resultCode && orderId) {

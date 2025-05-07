@@ -1,12 +1,13 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { defaultChatRepo } from "@/src/api/features/chat/ChatRepo";
-import { TopicResponseModel } from "@/src/api/features/topic/models/TopicModel";
-import { defaultTopicRepo } from "@/src/api/features/topic/TopicRepo";
-import { useAuth } from "@/src/context/auth/useAuth";
-import { router } from "expo-router";
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { defaultChatRepo } from "@/api/features/chat/ChatRepo";
+import { TopicResponseModel } from "@/api/features/topic/models/TopicModel";
+import { defaultTopicRepo } from "@/api/features/topic/TopicRepo";
+import { useAuth } from "@/context/auth/useAuth";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react"
 
 const CreateViewModel = () => {
+  const router = useRouter();
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
   const { localStrings, getUser } = useAuth();
   const [topics, setTopics] = useState<TopicResponseModel[]>([]);
@@ -26,8 +27,7 @@ const CreateViewModel = () => {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     }
   }
@@ -43,22 +43,18 @@ const CreateViewModel = () => {
         await getUser();
         setSelectedTopic(null)
         questionRef.current = ""
-        router.replace({
-          pathname: `/(routes)/card/${res?.data?._id}` as any,
-          params: { previous: "/(tabs)/history" }
-        });
+        router.replace(`/create/${res?.data?._id}`);
       } else {
         setResultObject({
           type: "error",
-          title: res?.error?.message
+          content: res?.error?.message
         })
       }
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setCreateLoading(false);

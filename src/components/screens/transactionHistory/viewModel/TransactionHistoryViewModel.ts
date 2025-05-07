@@ -1,10 +1,9 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { BillModel } from "@/src/api/features/topUp/models/BillModel";
-import { TransactionListRequestModel } from "@/src/api/features/transactionHistory/models/TransactionListModel";
-import { defaultTransactionHistoryRepo } from "@/src/api/features/transactionHistory/TransactionHistoryRepo";
-import { useAuth } from "@/src/context/auth/useAuth";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react"
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { BillModel } from "@/api/features/topUp/models/BillModel";
+import { TransactionListRequestModel } from "@/api/features/transactionHistory/models/TransactionListModel";
+import { defaultTransactionHistoryRepo } from "@/api/features/transactionHistory/TransactionHistoryRepo";
+import { useAuth } from "@/context/auth/useAuth";
+import { useCallback, useEffect, useState } from "react"
 
 const TransactionHistoryViewModel = () => {
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
@@ -35,16 +34,14 @@ const TransactionHistoryViewModel = () => {
         setHasMore(false);
         setResultObject({
           type: 'error',
-          title: localStrings.Transaction.GetListBillFailed,
-          content: res?.message
+          content: localStrings.Transaction.GetListBillFailed + " " + res?.message,
         })
       }
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setLoading(false);
@@ -58,19 +55,17 @@ const TransactionHistoryViewModel = () => {
     else return;
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      setBillList([]);
-      setPage(0);
-      getBillList(query);
-    }, [query])
-  )
+  useEffect(() => {
+    setBillList([]);
+    setPage(0);
+    getBillList(query);
+  }, [query])
 
   return {
     resultObject,
     loading, billList,
     query, setQuery,
-    getMoreChats
+    getMoreChats, hasMore
   }
 }
 

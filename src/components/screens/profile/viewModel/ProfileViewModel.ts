@@ -1,12 +1,10 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { useAuth } from "@/src/context/auth/useAuth";
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { useAuth } from "@/context/auth/useAuth";
 import { useRef, useState } from "react";
 import dayjs from 'dayjs';
-import { defaultProfileRepo } from "@/src/api/features/profile/ProfileRepo";
-import { UpdateUserRequestModel } from "@/src/api/features/profile/models/UpdateUserModel";
-import * as ImagePicker from 'expo-image-picker';
-import { convertMediaToFiles } from "@/src/utils/helper/TransferToFormData";
-import { ImagePickerAsset } from "expo-image-picker";
+import { defaultProfileRepo } from "@/api/features/profile/ProfileRepo";
+import { UpdateUserRequestModel } from "@/api/features/profile/models/UpdateUserModel";
+import { RcFile } from "antd/es/upload";
 
 const ProfileViewModel = () => {
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
@@ -17,7 +15,7 @@ const ProfileViewModel = () => {
   const [selectedBirthDate, setSelectedBirthDate] = useState(dayjs(user?.birthDate).toDate() || new Date());
   const [datePickerModal, setDatePickerModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState<ImagePickerAsset | null>(null);
+  const [image, setImage] = useState<RcFile | null>(null);
 
   const resetForm = () => {
     setEditMode(false)
@@ -27,36 +25,34 @@ const ProfileViewModel = () => {
   }
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ['images'],
+    //   allowsEditing: true,
+    //   aspect: [1, 1],
+    //   quality: 1,
+    // });
 
-    console.log(result);
+    // console.log(result);
 
-    if (!result.canceled) {
-      setImage(result.assets[0]);
-    }
+    // if (!result.canceled) {
+    //   setImage(result.assets[0]);
+    // }
   };
 
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = async (values: any) => {
     try {
       setLoading(true);
-      setEditMode(false);
-      const newAvatar = image && await convertMediaToFiles([image]) || [];
       const params: UpdateUserRequestModel = {
-        name: newName || undefined,
-        birthDate: dayjs(selectedBirthDate).format('YYYY-MM-DD') || undefined,
-        gender: selectedGender || undefined,
-        avatar: newAvatar.length > 0 ? newAvatar[0] : undefined
+        name: values?.name || undefined,
+        birthDate: dayjs(values?.birthDate).format('YYYY-MM-DD') || undefined,
+        gender: values?.gender || undefined,
+        avatar: values?.avatar?.file || undefined
       }
       const res = await defaultProfileRepo.updateProfile(params);
       if (res?.data) {
         setResultObject({
           type: 'success',
-          title: localStrings.Setting.UpdateProfileSuccess,
+          content: localStrings.Setting.UpdateProfileSuccess,
         });
         onUpdateProfile(res?.data);
         setEditMode(false);
@@ -64,16 +60,14 @@ const ProfileViewModel = () => {
         setEditMode(true);
         setResultObject({
           type: 'error',          
-          title: localStrings.Setting.UpdateProfileFailed,
-          content: res?.message
+          content: localStrings.Setting.UpdateProfileFailed + ': ' + res?.message,
         });
       } 
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setLoading(false);

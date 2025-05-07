@@ -1,9 +1,8 @@
-import { useCallback, useState } from 'react'
-import { HoroscopeResponseModel } from '@/src/api/features/horoscope/models/HoroscopeModel'
-import { ResultObject } from '@/src/api/baseApiResponseModel/baseApiResponseModel';
-import { useAuth } from '@/src/context/auth/useAuth';
-import { defaultHoroscopeRepo } from '@/src/api/features/horoscope/HoroscopeRepo';
-import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react'
+import { HoroscopeResponseModel } from '@/api/features/horoscope/models/HoroscopeModel'
+import { ResultObject } from '@/api/baseApiResponseModel/baseApiResponseModel';
+import { useAuth } from '@/context/auth/useAuth';
+import { defaultHoroscopeRepo } from '@/api/features/horoscope/HoroscopeRepo';
 
 const HoroscopeDetailViewModel = (date: string) => {
   const { localStrings, language } = useAuth();
@@ -24,19 +23,16 @@ const HoroscopeDetailViewModel = (date: string) => {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage
       })
     } finally {
       setLoading(false);
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      getHoroscopeDetail();
-    }, [date, language])
-  );
+  useEffect(() => {
+    getHoroscopeDetail();
+  }, [date, language]);
 
   return {
     resultObject,

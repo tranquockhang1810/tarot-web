@@ -19,5 +19,5 @@ export interface ChatListResponseModel {
   question?: string
   status?: boolean
   createdAt?: string
-  latestMessage: MessageResponseModel
+  latestMessage?: MessageResponseModel
 }

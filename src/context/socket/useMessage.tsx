@@ -1,13 +1,13 @@
+"use client";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Alert, PermissionsAndroid, Platform } from "react-native";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../auth/useAuth";
 import { MessageContextType } from "./MessageContextType";
-import { MessageResponseModel } from "@/src/api/features/history/models/MessageModel";
-import messaging from '@react-native-firebase/messaging';
+import { MessageResponseModel } from "@/api/features/history/models/MessageModel";
+import { message as AntdMessage } from "antd";
 
 // ⚡ URL socket server
-const SOCKET_URL = process.env.EXPO_PUBLIC_SERVER_ENDPOINT;
+const SOCKET_URL = process.env.NEXT_PUBLIC_SERVER_ENDPOINT;
 
 // Tạo Context
 const MessageContext = createContext<MessageContextType | undefined>(undefined);
@@ -25,18 +25,13 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
   useEffect(() => {
     if (!user?._id) return;
     const connectSocket = async () => {
-      const hasPermission = await requestNotificationPermission();
-      if (!hasPermission) return;
-
-      const fcmToken = await getFcmToken();
-      if (!fcmToken) return;
 
       const newSocket = io(SOCKET_URL, { transports: ["websocket"] });
 
       newSocket.on("connect", () => {
         console.log("✅ Connected to socket");
         setIsConnected(true);
-        newSocket.emit("registerUser", { userId: user?._id, fcmToken });
+        newSocket.emit("registerUser", { userId: user?._id });
       });
 
       newSocket.on("disconnect", () => {
@@ -59,7 +54,7 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
 
       newSocket.on("errorMessage", (error: { message: string }) => {
         console.error("🚨 Socket Error:", error);
-        Alert.alert("Error", error.message);
+        AntdMessage.error(`Socket Error: ${error.message}`);
       });
 
       newSocket.on("unreadNotification", (count: number) => {
@@ -84,7 +79,7 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
   const sendMessage = useCallback(
     (chatID: string, message: string) => {
       if (!socket || !isConnected) {
-        Alert.alert("Error", "Not connected to chat server.");
+        AntdMessage.error("Not connected to chat server.");
         return;
       }
       socket.emit("sendMessage", { userID: user?._id, chatID, message });
@@ -95,7 +90,8 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
   const updateMessageSeen = useCallback(
     (chatId: string) => {
       if (!socket || !isConnected) {
-        Alert.alert("Error", "Not connected to chat server.");
+        console.error("Not connected to chat server.");
+        AntdMessage.error("Not connected to chat server.");
         return;
       }
       socket.emit("seenMessages", { chatId });
@@ -105,46 +101,11 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
 
   const seenNotification = useCallback((id?: string) => {
     if (!socket || !isConnected) {
-      Alert.alert("Error", "Not connected to chat server.");
+      AntdMessage.error("Not connected to chat server.");
       return;
     }
     socket.emit("seenNotification", { userId: id ? undefined : user?._id, id });
   }, [socket, isConnected, user])
-
-  const getFcmToken = async () => {
-    try {
-      const token = await messaging().getToken();
-      return token;
-    } catch (error) {
-      console.error('Failed to get FCM token:', error);
-      return null;
-    }
-  };
-
-  const requestNotificationPermission = async () => {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (!enabled) {
-      Alert.alert("Thông báo", "Bạn cần bật quyền thông báo để nhận tin nhắn.");
-      return false;
-    }
-
-    // Android 13+ cần thêm POST_NOTIFICATIONS
-    if (Platform.OS === 'android' && Platform.Version >= 33) {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert("Thông báo", "Bạn cần cho phép thông báo để nhận tin nhắn.");
-        return false;
-      }
-    }
-
-    return true;
-  };
 
   const checkUnreadNotification = () => {
     socket?.emit("checkUnreadNotification", { userId: user?._id });
@@ -169,6 +130,7 @@ export const MessageProvider = ({ children }: { children: React.ReactNode }) => 
         seenNotification,
         checkUnreadNotification,
         unreadNotification,
+        seenDoneTrigger
       }}
     >
       {children}

@@ -2,6 +2,7 @@ import { VnLocalizedStrings } from "@/utils/localizedStrings/vietnam";
 import { ENGLocalizedStrings } from "@/utils/localizedStrings/english";
 import { UserModel } from "@/api/features/profile/models/UserModel";
 import { LoginResponseModel } from "@/api/features/login/models/LoginModel";
+import { Dispatch } from "react";
 
 export interface AuthContextType {
   onLogin: (user: LoginResponseModel) => void;
@@ -16,4 +17,6 @@ export interface AuthContextType {
   isLoginUser: (userId: string) => boolean;
   checkAuthLoading: boolean;
   getUser: () => Promise<void>;
+  newChatId: string | null;
+  setNewChatId: Dispatch<React.SetStateAction<string | null>>;
 }

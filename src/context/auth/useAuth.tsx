@@ -18,6 +18,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<UserModel | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [checkAuthLoading, setCheckAuthLoading] = useState(true);
+  const [newChatId, setNewChatId] = useState<string | null>(null);
 
   const checkLanguage = async () => {
     const storedLanguage = localStorage.getItem('language');
@@ -111,7 +112,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       onUpdateProfile,
       isLoginUser,
       checkAuthLoading,
-      getUser
+      getUser,
+      newChatId, setNewChatId
     }}
     >
       {children}

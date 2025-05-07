@@ -1,19 +1,19 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { defaultChatRepo } from "@/src/api/features/chat/ChatRepo";
-import { ChatRequestModel, ChatResponseModel } from "@/src/api/features/chat/models/ChatModel";
-import { useAuth } from "@/src/context/auth/useAuth";
-import { useMessage } from "@/src/context/socket/useMessage";
-import { Href, router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { defaultChatRepo } from "@/api/features/chat/ChatRepo";
+import { ChatRequestModel, ChatResponseModel } from "@/api/features/chat/models/ChatModel";
+import { useAuth } from "@/context/auth/useAuth";
+import { useMessage } from "@/context/socket/useMessage";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const ChatViewModel = (chatID: string) => {
-  const { localStrings } = useAuth();
+  const router = useRouter();
+  const { localStrings, newChatId } = useAuth();
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
   const [chatsLoading, setChatsLoading] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<ChatResponseModel | null>(null);
-  const { messages, setMessages, sendMessage, isConnected, updateMessageSeen } = useMessage();
+  const { messages, setMessages, sendMessage, isConnected, updateMessageSeen, isNewMessage } = useMessage();
   const [input, setInput] = useState<string>("");
-  const { previous } = useLocalSearchParams();
   const [isSendQuestion, setIsSendQuestion] = useState(false);
   const [query, setQuery] = useState<ChatRequestModel>({
     id: chatID,
@@ -56,30 +56,19 @@ const ChatViewModel = (chatID: string) => {
         setChatInfo(null);
         setResultObject({
           type: "error",
-          title: localStrings.Chat.GetListMessageFailed,
-          content: res?.message,
+          content: localStrings.Chat.GetListMessageFailed + " " + res?.message,
         });
       }
     } catch (error: any) {
       console.error("🚨 Error:", error);
       setResultObject({
         type: "error",
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.message,
+        content: error?.message || localStrings.GLobals.ErrorMessage,
       });
     } finally {
       setChatsLoading(false);
     }
   };
-
-  const backAction = useCallback(() => {
-    if (previous) {
-      router.replace(previous as Href);
-    } else {
-      router.back();
-    }
-    return true;
-  }, [previous]);
 
   const loadOlderMessages = () => {
     if (hasMore && !chatsLoading && page > 0) {
@@ -95,33 +84,35 @@ const ChatViewModel = (chatID: string) => {
       if (res?.code === 200) {
         setResultObject({
           type: "success",
-          title: localStrings.Chat.DeleteChatSuccess,
+          content: localStrings.Chat.DeleteChatSuccess,
         });
-        router.replace(`/(tabs)/history`);
+        setDetailShow(false);
       } else {
         setResultObject({
           type: "error",
-          title: localStrings.Chat.DeleteChatFailed,
-          content: res?.message,
+          content: localStrings.Chat.DeleteChatFailed + " " + res?.message,
         });
       }
     } catch (error: any) {
       console.error("🚨 Error:", error);
       setResultObject({
         type: "error",
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.message,
-      })
+        content: error?.message || localStrings.GLobals.ErrorMessage,
+      });
     } finally {
       setDeleteLoading(false);
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      getChatMessages(query);
-    }, [query])
-  );
+  useEffect(() => {
+    getChatMessages(query);
+  }, [query, isNewMessage]);
+
+  useEffect(() => {
+    if (chatID) {
+      setQuery({ id: chatID, page: 1, limit: 20 });
+    }
+  }, [chatID]);
 
   useEffect(() => {
     if (isConnected)
@@ -129,15 +120,17 @@ const ChatViewModel = (chatID: string) => {
   }, [chatID, isConnected]);
 
   useEffect(() => {
-    if (previous && chatInfo && !isSendQuestion) {
+    if (newChatId && chatInfo && !isSendQuestion) {
       sendMessage(chatID, chatInfo?.question || "");
       setIsSendQuestion(true)
+      setHasMore(true);
+      setPage(1);
     }
-  }, [previous, chatID, chatInfo])
+  }, [newChatId, chatID, chatInfo])
 
   useEffect(() => {
     if (chatInfo && chatInfo?.cards && chatInfo?.cards?.length < 3) {
-      router.replace(`/card/${chatID}`);
+      router.replace(`/create/${chatID}`);
     }
   }, [chatID, chatInfo])
 
@@ -147,13 +140,13 @@ const ChatViewModel = (chatID: string) => {
     isConnected,
     input,
     setInput,
-    handleSend,
+    handleSend, hasMore,
     chatsLoading,
     loadOlderMessages,
     chatInfo,
     setMessages,
     updateMessageSeen,
-    backAction,
+    // backAction,
     detailShow, setDetailShow,
     deleteChat, deleteLoading
   };

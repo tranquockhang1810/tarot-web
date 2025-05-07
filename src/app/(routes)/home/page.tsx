@@ -1,15 +1,8 @@
-"use client";
-import { useAuth } from '@/context/auth/useAuth';
-import { Button } from 'antd';
-import React from 'react'
+import HomeView from '@/components/screens/home/view/HomeView';
 
 function home() {
-  const { user, onLogout } = useAuth();
   return (
-    <>
-      <div>Xin chào {user?.name}</div>
-      <Button onClick={onLogout}>Đăng xuất</Button>
-    </>
+    <HomeView />
   )
 }
 

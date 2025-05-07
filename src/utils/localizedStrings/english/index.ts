@@ -118,6 +118,8 @@ export const ENGLocalizedStrings = {
     Profile: "Profile",
     History: "Chat",
     Notification: "Notification",
+    Horoscope: "Daily Horoscope",
+    TransactionHistory: "Transaction History",
   },
   Profile: {
     Title: "My profile",

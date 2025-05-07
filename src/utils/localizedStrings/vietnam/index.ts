@@ -118,6 +118,8 @@ export const VnLocalizedStrings = {
     Profile: "Tôi",
     History: "Trò chuyện",
     Notification: "Thông báo",
+    Horoscope: "Thông điệp ngày",
+    TransactionHistory: "Lịch sử giao dịch"
   },
   Profile: {
     Title: "Trang cá nhân",

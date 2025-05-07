@@ -1,17 +1,17 @@
-import { ResultObject } from "@/src/api/baseApiResponseModel/baseApiResponseModel";
-import { defaultChatRepo } from "@/src/api/features/chat/ChatRepo";
-import { defaultHistoryRepo } from "@/src/api/features/history/HistoryRepo";
-import { ChatListRequestModel, ChatListResponseModel } from "@/src/api/features/history/models/ChatListModel";
-import { TopicResponseModel } from "@/src/api/features/topic/models/TopicModel";
-import { defaultTopicRepo } from "@/src/api/features/topic/TopicRepo";
-import { useAuth } from "@/src/context/auth/useAuth";
-import { useMessage } from "@/src/context/socket/useMessage";
+import { ResultObject } from "@/api/baseApiResponseModel/baseApiResponseModel";
+import { defaultChatRepo } from "@/api/features/chat/ChatRepo";
+import { defaultHistoryRepo } from "@/api/features/history/HistoryRepo";
+import { ChatListRequestModel, ChatListResponseModel } from "@/api/features/history/models/ChatListModel";
+import { TopicResponseModel } from "@/api/features/topic/models/TopicModel";
+import { defaultTopicRepo } from "@/api/features/topic/TopicRepo";
+import { useAuth } from "@/context/auth/useAuth";
+import { useMessage } from "@/context/socket/useMessage";
 import dayjs from "dayjs";
-import { useFocusEffect } from "expo-router";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const HistoryViewModel = () => {
-  const { isNewMessage, setMessages, setHaveUnreadMessages } = useMessage();
+  const { isNewMessage, setHaveUnreadMessages } = useMessage();
   const [resultObject, setResultObject] = useState<ResultObject | null>(null);
   const [listLoading, setListLoading] = useState(false);
   const [listChats, setListChats] = useState<ChatListResponseModel[] | undefined>([]);
@@ -20,7 +20,6 @@ const HistoryViewModel = () => {
   const [hasMore, setHasMore] = useState(true);
   const { localStrings } = useAuth();
   const [topics, setTopics] = useState<TopicResponseModel[]>([]);
-  const [showFilter, setShowFilter] = useState(false);
   const topicRefs = useRef<Record<string, boolean>>({});
   const [refreshing, setRefreshing] = useState(false);
   const [fromDate, setFromDate] = useState(new Date());
@@ -58,16 +57,14 @@ const HistoryViewModel = () => {
         setHasMore(false);
         setResultObject({
           type: 'error',
-          title: localStrings.History.GetListChatFailed,
-          content: res?.message
+          content: localStrings.History.GetListChatFailed + res?.message,
         })
       }
     } catch (error: any) {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setListLoading(false);
@@ -89,8 +86,7 @@ const HistoryViewModel = () => {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setRefreshing(false);
@@ -109,35 +105,32 @@ const HistoryViewModel = () => {
       console.error(error);
       setResultObject({
         type: 'error',
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.error?.message || error?.message
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     }
   }
 
-  const handleApply = () => {
-    const topic = Object.keys(topicRefs.current).filter((key) => topicRefs.current[key]);
-    const status = statusRefs.current === "true" ? true : statusRefs.current === "false" ? false : undefined;
+  const handleApply = (values: any) => {
+    console.log("values", values);
+    console.log("dateFilterType", dateFilterType);
+
+
+    // const topic = Object.keys(topicRefs.current).filter((key) => topicRefs.current[key]);
+    // const status = statusRefs.current === "true" ? true : statusRefs.current === "false" ? false : undefined;
     setListChats([]);
     setQuery({
       page: 1,
       limit: 12,
-      topic,
-      fromDate: dateFilterType === "all" ? undefined : dayjs(fromDate).format('YYYY-MM-DD'),
-      toDate: dateFilterType === "all" ? undefined : dayjs(toDate).format('YYYY-MM-DD'),
-      status,
+      topic: values?.topics?.length > 0 ? values?.topics : undefined,
+      fromDate: dateFilterType === "all" ? undefined : dayjs(values?.dateRange?.[0]).format('YYYY-MM-DD'),
+      toDate: dateFilterType === "all" ? undefined : dayjs(values?.dateRange?.[1]).format('YYYY-MM-DD'),
+      status: values?.status !== "" ? values?.status : undefined,
     });
-    setShowFilter(false);
   };
 
   const resetFilter = () => {
-    topicRefs.current = {};
-    statusRefs.current = "";
-    setFromDate(new Date());
-    setToDate(new Date());
+    setDateFilterType("all");
     setQuery({ page: 1, limit: 12 });
-    setShowFilter(false);
-    setResetFlag(prev => !prev);
   };
 
   const deleteChat = async (id: string) => {
@@ -147,35 +140,30 @@ const HistoryViewModel = () => {
       if (res?.code === 200) {
         setResultObject({
           type: "success",
-          title: localStrings.Chat.DeleteChatSuccess,
+          content: localStrings.Chat.DeleteChatSuccess,
         });
         getListChats(query)
       } else {
         setResultObject({
           type: "error",
-          title: localStrings.Chat.DeleteChatFailed,
-          content: res?.message,
+          content: localStrings.Chat.DeleteChatFailed + res?.message,
         });
       }
     } catch (error: any) {
       console.error("🚨 Error:", error);
       setResultObject({
         type: "error",
-        title: localStrings.GLobals.ErrorMessage,
-        content: error?.message,
+        content: error?.error?.message || error?.message || localStrings.GLobals.ErrorMessage,
       })
     } finally {
       setDeleteLoading(false);
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      setMessages([]);
-      setPage(0);
-      getListChats(query);
-    }, [query, isNewMessage])
-  )
+  useEffect(() => {
+    setPage(0);
+    getListChats(query);
+  }, [query, isNewMessage, resetFlag])
 
   useEffect(() => {
     getTopicList();
@@ -200,8 +188,6 @@ const HistoryViewModel = () => {
     getListChats,
     getMoreChats,
     topics,
-    showFilter,
-    setShowFilter,
     topicRefs,
     handleApply,
     refreshListChats,
@@ -213,7 +199,7 @@ const HistoryViewModel = () => {
     statusRefs,
     statusList,
     resetFilter,
-    resetFlag,
+    resetFlag, setResetFlag,
     dateFilterType, setDateFilterType,
     deleteLoading,
     deleteChat,

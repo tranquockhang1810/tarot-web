@@ -1,94 +1,112 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
-import { Image } from 'expo-image';
-import React from 'react'
-import { ChatResponseModel } from '@/src/api/features/chat/models/ChatModel'
-import { useAuth } from '@/src/context/auth/useAuth';
-import useColor from '@/src/hooks/useColor';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Modal } from '@ant-design/react-native';
+import { Modal, Button, Typography, Image, Row, Col } from "antd";
+import { ChatResponseModel } from "@/api/features/chat/models/ChatModel";
+import { DeleteOutlined } from "@ant-design/icons";
+import { useAuth } from "@/context/auth/useAuth";
+import useColor from "@/hooks/useColor";
+import { AiOutlineClose } from "react-icons/ai";
 
-const ChatDetail = ({
-  chatInfo,
-  deleteChat,
-  deleteLoading
-}: {
-  chatInfo: ChatResponseModel | null,
-  deleteChat: (id: string) => void,
-  deleteLoading: boolean
-}) => {
-  const { localStrings } = useAuth();
-  const { brandPrimaryTap, orange, redError } = useColor();
-  return (
-    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, paddingHorizontal: 20 }}>
-      <Text style={{ color: "white", fontSize: 18, fontWeight: "bold", paddingTop: 20 }}>{`${localStrings?.Create.Question}: "` + chatInfo?.question?.toUpperCase()}"</Text>
-      <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", paddingTop: 20 }}>
-        {`${localStrings?.GLobals.Cards}: `}
-      </Text>
-      <View style={{ flexDirection: "row", justifyContent: "space-evenly", flexWrap: "wrap", paddingTop: 20 }}>
-        {chatInfo && chatInfo?.cards?.map((card, index) => {
-          return (
-            <View
-              key={index}
-              style={{ alignItems: "center", justifyContent: "center", margin: 5 }}
-            >
-              <View
-                style={{
-                  width: 127,
-                  height: 225,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: brandPrimaryTap,
-                  borderRadius: 10,
-                  borderWidth: card ? 3 : 0,
-                  borderColor: "#fff",
-                }}
-              >
-                <Image source={{ uri: `${process.env.EXPO_PUBLIC_SERVER_ENDPOINT}/card/${card?.toLowerCase().replaceAll(" ", "-")}.png` }}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 5,
-                  }}
-                />
-              </View>
-              <Text style={{ color: "white", fontSize: 14, marginTop: 5 }}>{card}</Text>
-            </View>
-          )
-        })}
-      </View>
-      <TouchableOpacity
-        style={{
-          width: "100%",
-          marginTop: 10,
-          backgroundColor: redError,
-          height: 50,
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: 10,
-          pointerEvents: deleteLoading ? 'none' : 'auto'
-        }}
-        onPress={() =>
-          Modal.alert(
-            localStrings?.GLobals?.Delete,
-            localStrings?.GLobals?.DeleteChat,
-            [
-              { text: localStrings?.GLobals?.Cancel, style: 'cancel' },
-              { text: localStrings?.GLobals?.Delete, onPress: () => { chatInfo?._id && deleteChat(chatInfo?._id) } },
-            ]
-          )
-        }
-      >
-        {deleteLoading ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 14, marginRight: 10, fontWeight: 'bold' }}>{localStrings?.GLobals?.Delete}</Text>
-            <MaterialIcons name="delete" size={24} color="white" />
-          </View>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
-  )
+const { Title, Text } = Typography;
+
+interface ChatDetailModalProps {
+  open: boolean;
+  onClose: () => void;
+  chatInfo: ChatResponseModel | null;
+  deleteChat: (id: string) => void;
+  deleteLoading: boolean;
 }
 
-export default ChatDetail
+const ChatDetailModal: React.FC<ChatDetailModalProps> = ({
+  open,
+  onClose,
+  chatInfo,
+  deleteChat,
+  deleteLoading,
+}) => {
+  const { localStrings } = useAuth();
+  const { brandPrimaryDark, brandPrimaryTap } = useColor();
+
+  const handleDelete = () => {
+    Modal.confirm({
+      title: localStrings?.GLobals?.Delete,
+      content: localStrings?.GLobals?.DeleteChat,
+      okText: localStrings?.GLobals?.Delete,
+      okButtonProps: { danger: true },
+      cancelText: localStrings?.GLobals?.Cancel,
+      onOk: () => chatInfo?._id && deleteChat(chatInfo._id),
+    });
+  };
+
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      title={
+        <Title level={4} className="!mb-0 !text-white">
+          {localStrings?.Create.Question}: "
+          {chatInfo?.question?.toUpperCase()}"
+        </Title>
+      }
+      width={800}
+      className="custom-modal"
+      styles={{
+        header: { backgroundColor: brandPrimaryDark },
+        content: { backgroundColor: brandPrimaryDark }
+      }}
+      maskClosable={false}
+      closeIcon={<AiOutlineClose className="text-white" />}
+    >
+      <div className="max-h-[70vh] overflow-y-auto px-2">
+        <div className="mt-4">
+          <span className="text-white text-lg font-bold">
+            {localStrings?.GLobals.Cards}:
+          </span>
+        </div>
+
+        <Row gutter={[16, 16]} className="mt-4">
+          {chatInfo?.cards?.map((card, index) => {
+            const imageUrl = `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/card/${card?.toLowerCase().replaceAll(" ", "-")}.png`;
+
+            return (
+              <Col key={index} xs={24} sm={12} md={8} lg={8} className="text-center">
+                <div
+                  className="rounded-xl border-2 border-white overflow-hidden mx-auto"
+                  style={{
+                    width: 127,
+                    height: 225,
+                    backgroundColor: brandPrimaryTap,
+                  }}
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={card}
+                    width={127}
+                    height={225}
+                    className="object-cover w-full h-full rounded"
+                    preview={false}
+                  />
+                </div>
+                <span className="text-white mt-2 block">{card}</span>
+              </Col>
+            );
+          })}
+        </Row>
+
+        <div className="flex justify-end mt-6">
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            loading={deleteLoading}
+            onClick={handleDelete}
+            className="text-white font-bold rounded-lg px-6 py-2"
+          >
+            {localStrings?.GLobals?.Delete}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default ChatDetailModal;

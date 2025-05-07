@@ -1,14 +1,16 @@
-import { defaultCardRepo } from "@/src/api/features/card/CardRepo";
-import { CardModel } from "@/src/api/features/card/models/CardModel";
-import { defaultChatRepo } from "@/src/api/features/chat/ChatRepo";
-import { Href, router, useLocalSearchParams } from "expo-router";
+import { defaultCardRepo } from "@/api/features/card/CardRepo";
+import { CardModel } from "@/api/features/card/models/CardModel";
+import { defaultChatRepo } from "@/api/features/chat/ChatRepo";
+import { useAuth } from "@/context/auth/useAuth";
+import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 
 const CardViewModel = (id: string) => {
+  const { setNewChatId } = useAuth();
+  const router = useRouter();
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [placedCards, setPlacedCards] = useState<(CardModel | null)[]>([null, null, null]);
   const [remainingCards, setRemainingCards] = useState<CardModel[]>([]);
-  const { previous } = useLocalSearchParams();
   const [cardsLoading, setCardsLoading] = useState<boolean>(false);
 
   const handlePlaceCard = (slotIndex: number) => {
@@ -27,28 +29,15 @@ const CardViewModel = (id: string) => {
     setSelectedCard(null);
   };
 
-  const backAction = useCallback(() => {
-    if (previous) {
-      router.replace(previous as Href);
-    } else {
-      router.back();
-    }
-    return true;
-  }, [previous]);
-
   const updateCards = async () => {
     try {
-      console.log("placedCards", placedCards);
-      
       const res = await defaultChatRepo.updateCard({
         id: id as string,
         cards: placedCards.map((card) => card?.name || ""),
       })
       if (res?.code === 200) {
-        router.replace({
-          pathname: `/(routes)/chat/${id}` as any,
-          params: { previous: "/(tabs)/history" }
-        });
+        setNewChatId(id as string);
+        router.push("/chat");
       }
     } catch (error: any) {
       console.error(error);
@@ -63,7 +52,7 @@ const CardViewModel = (id: string) => {
         setRemainingCards(res?.data?.map((card: CardModel) => {
           return {
             ...card,
-            image: `${process.env.EXPO_PUBLIC_SERVER_ENDPOINT}${card?.image}`
+            image: `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}${card?.image}`
           }
         }));
       }
@@ -80,7 +69,6 @@ const CardViewModel = (id: string) => {
 
   return {
     handlePlaceCard,
-    backAction,
     updateCards,
     selectedCard, setSelectedCard,
     placedCards, setPlacedCards,

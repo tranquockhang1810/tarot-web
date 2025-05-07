@@ -1,11 +1,10 @@
-import { NotificationRequestModel, NotificationResponseModel } from "@/src/api/features/notification/models/NotificationModel";
-import { defaultNotificationRepo } from "@/src/api/features/notification/NotificationRepo";
-import { useMessage } from "@/src/context/socket/useMessage"
-import { useFocusEffect } from "expo-router";
+import { NotificationRequestModel, NotificationResponseModel } from "@/api/features/notification/models/NotificationModel";
+import { defaultNotificationRepo } from "@/api/features/notification/NotificationRepo";
+import { useMessage } from "@/context/socket/useMessage"
 import { useCallback, useEffect, useState } from "react";
 
 const NotificationViewModel = () => {
-  const { seenNotification } = useMessage();
+  const { seenNotification, seenDoneTrigger } = useMessage();
   const [page, setPage] = useState(1);
   const [notifications, setNotifications] = useState<NotificationResponseModel[]>([]);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
@@ -46,24 +45,23 @@ const NotificationViewModel = () => {
     setSeenTrigger((prev) => !prev);
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      getNotifications({ page: 1, limit: 8 });
+  useEffect(() => {
+    getNotifications({ page: 1, limit: 8 });
 
-      return () => {
-        setPage(1);
-      }
-    }, [seenTrigger])
-  );
+    return () => {
+      setPage(1);
+    }
+  }, [seenTrigger, seenDoneTrigger])
 
   useEffect(() => {
     page > 1 && getNotifications({ page, limit: 8 });
-  }, [seenTrigger, page])
+  }, [seenTrigger, page, seenDoneTrigger])
 
   return {
     notifications,
     loadMoreNotifications,
-    seenNoti
+    seenNoti,
+    hasMoreNotifications
   }
 }
 

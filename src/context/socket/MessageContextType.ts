@@ -1,4 +1,4 @@
-import { MessageResponseModel } from "@/src/api/features/history/models/MessageModel";
+import { MessageResponseModel } from "@/api/features/history/models/MessageModel";
 
 export interface MessageContextType {
   messages: MessageResponseModel[] | undefined;
@@ -12,4 +12,5 @@ export interface MessageContextType {
   seenNotification: (id?: string) => void;
   unreadNotification: number;
   checkUnreadNotification: () => void;
+  seenDoneTrigger: number;
 }

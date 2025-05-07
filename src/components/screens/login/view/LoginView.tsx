@@ -92,7 +92,7 @@ const LoginView = () => {
           </Col>
         </Row>
         <Row justify={"center"} className="w-full">
-          <Col xs={20} sm={8} md={6} lg={3}>
+          <Col xs={20} md={10} lg={3}>
             <div className="text-3xl font-bold text-center">
               {localStrings.GLobals.AppName}
             </div>

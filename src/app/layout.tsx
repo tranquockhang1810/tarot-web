@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 import { AuthProvider } from "@/context/auth/useAuth";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import useColor from "@/hooks/useColor";
 import '@ant-design/v5-patch-for-react-19';
+import { MessageProvider } from "@/context/socket/useMessage";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,16 +38,18 @@ export default function RootLayout({
       >
         <AntdRegistry>
           <AuthProvider>
-            <ConfigProvider
-              theme={{
-                token: {
-                  colorError: redError,
-                  colorPrimary: brandPrimaryDark,
-                }
-              }}
-            >
-              {children}
-            </ConfigProvider>
+            <MessageProvider>
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorError: redError,
+                    colorPrimary: brandPrimary,
+                  }
+                }}
+              >
+                {children}
+              </ConfigProvider>
+            </MessageProvider>
           </AuthProvider>
         </AntdRegistry>
       </body>

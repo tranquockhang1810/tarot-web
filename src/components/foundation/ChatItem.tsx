@@ -6,24 +6,30 @@ import { GetRemainingDay } from "@/utils/helper/DateTransfer";
 import { Image } from "antd";
 import { Dispatch, SetStateAction } from "react";
 import { GoDotFill } from "react-icons/go";
+import { useMediaQuery } from "react-responsive";
 
 const ChatItem = ({
   item,
   selectedChat,
   setSelectedChat,
   resetFlag,
-  setResetFlag
+  setResetFlag,
+  setListCollapsed
 }: {
   item?: ChatListResponseModel,
   selectedChat?: ChatListResponseModel,
   setSelectedChat?: Dispatch<SetStateAction<ChatListResponseModel | undefined>>,
   resetFlag?: boolean,
-  setResetFlag?: Dispatch<SetStateAction<boolean>>
+  setResetFlag?: Dispatch<SetStateAction<boolean>>,
+  setListCollapsed?: Dispatch<SetStateAction<boolean>>
 }) => {
   const { localStrings, language, setNewChatId } = useAuth();
   const { redError, violet, brandPrimaryTap } = useColor();
   const { createdDate, remaining } = GetRemainingDay(item?.createdAt, localStrings, language);
   const { updateMessageSeen } = useMessage();
+  const isMobile = useMediaQuery({
+    query: '(max-width: 768px)'
+  })
 
   return (
     <div className="flex flex-row items-center px-2 py-2"
@@ -32,6 +38,7 @@ const ChatItem = ({
         setNewChatId("");
         setResetFlag && setResetFlag(!resetFlag);
         updateMessageSeen(item?._id || '');
+        setListCollapsed && isMobile && setListCollapsed(true);
       }}
       style={{ cursor: 'pointer', backgroundColor: selectedChat?._id === item?._id ? brandPrimaryTap : '' }}
     >

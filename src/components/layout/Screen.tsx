@@ -64,6 +64,7 @@ const Screen = ({
           collapsedWidth={0}
           trigger={null}
           width={300}
+          style={{ scrollbarWidth: 'none', height: '100vh', background: brandPrimary }}
         >
           <TabBar />
         </Sider>

@@ -51,6 +51,7 @@ const HoroscopeListView = () => {
                     width={220}
                     height={160}
                     className="object-contain"
+                    preview={false}
                   />
                 )}
               </div>

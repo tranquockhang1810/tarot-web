@@ -1,11 +1,9 @@
 "use client"
 import { ChatListResponseModel } from "@/api/features/history/models/ChatListModel";
-import { useAuth } from "@/context/auth/useAuth";
-import useColor from "@/hooks/useColor";
 import { Layout } from "antd"
 import { Content } from "antd/es/layout/layout"
 import Sider from "antd/es/layout/Sider"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import HistoryView from "../history/view/HistoryView";
 import { useMediaQuery } from "react-responsive";
 import ChatView from "../chat/view/ChatView";
@@ -26,20 +24,21 @@ const ChatAndHistoryView = () => {
         breakpoint="md"
         onBreakpoint={collapsed => setListCollapsed(collapsed)}
         collapsedWidth={0}
-        // trigger={null}
+        // trigger={<IoIosChatboxes />}
         className="overflow-y-scroll overflow-x-hidden"
         style={{ scrollbarWidth: "none", height: "100vh" }}
       >
         <HistoryView
           selectedChat={selectedChat}
           setSelectedChat={setSelectedChat}
+          setListCollapsed={setListCollapsed}
         />
       </Sider>
 
       {(!isMobile || (isMobile && listCollapsed)) && selectedChat &&
         <Layout>
           <Content>
-            <ChatView chatId={selectedChat?._id || ""} />
+            <ChatView chatId={selectedChat?._id || ""} listCollapsed={listCollapsed} setListCollapsed={setListCollapsed}/>
           </Content>
         </Layout>}
     </Layout>

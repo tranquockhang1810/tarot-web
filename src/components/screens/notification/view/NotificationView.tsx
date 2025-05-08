@@ -18,7 +18,7 @@ const NotificationView = () => {
         <h1 className="text-2xl font-bold">{localStrings?.Tabbar?.Notification}</h1>
         <button
           onClick={() => seenNoti()}
-          className="text-white"
+          className="text-white hover:cursor-pointer"
         >
           <FaCheckDouble style={{ fontSize: 24 }} />
         </button>

@@ -1,5 +1,5 @@
 const genAssetsLink = (link: string) => {
-  return `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT}/card/${link}`;
+  return `${process.env.NEXT_PUBLIC_SERVER_ENDPOINT!}/card/${link}`;
 }
 
 export const LOGIN_BACKGROUND_VIDEO = genAssetsLink("background.mp4");

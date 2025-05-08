@@ -3,7 +3,7 @@ import ChatItem from "@/components/foundation/ChatItem";
 import HistoryViewModel from "../viewModel/HistoryViewModel";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Button, Spin, Tooltip } from "antd";
+import { Button, Empty, Spin, Tooltip } from "antd";
 import useColor from "@/hooks/useColor";
 import { IoFilterSharp } from "react-icons/io5";
 import FilterForm from "@/components/foundation/ListChatFilter";
@@ -14,10 +14,12 @@ import { useAuth } from "@/context/auth/useAuth";
 
 const HistoryView = ({
   selectedChat,
-  setSelectedChat
+  setSelectedChat,
+  setListCollapsed
 }: {
   selectedChat?: ChatListResponseModel,
-  setSelectedChat?: Dispatch<SetStateAction<ChatListResponseModel | undefined>>
+  setSelectedChat?: Dispatch<SetStateAction<ChatListResponseModel | undefined>>,
+  setListCollapsed?: Dispatch<SetStateAction<boolean>>
 }) => {
   const {
     listChats,
@@ -50,7 +52,7 @@ const HistoryView = ({
   useEffect(() => {
     if (newChatId) {
       console.log("newChatId", newChatId);
-      
+
       setSelectedChat && setSelectedChat({ _id: newChatId });
     } else if (isFirstRender && listChats && listChats?.length > 0) {
       setIsFirstRender(false);
@@ -97,6 +99,7 @@ const HistoryView = ({
           }
           scrollableTarget="scrollableDiv"
         >
+          {listChats?.length === 0 && <div className="flex justify-center items-center"><Empty /></div>}
           {listChats?.map((item: ChatListResponseModel) => (
             <ChatItem
               key={item?._id}
@@ -105,6 +108,7 @@ const HistoryView = ({
               setSelectedChat={setSelectedChat}
               resetFlag={resetFlag}
               setResetFlag={setResetFlag}
+              setListCollapsed={setListCollapsed}
             />
           ))}
         </InfiniteScroll>

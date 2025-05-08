@@ -13,7 +13,7 @@ import { MdPayments } from "react-icons/md";
 import { Button, Spin } from "antd";
 
 const TransactionHistoryView = () => {
-  const { localStrings } = useAuth();
+  const { localStrings, language } = useAuth();
   const router = useRouter();
   const { brandPrimaryDark, brandPrimaryTap, redError, brandPrimary } = useColor();
 
@@ -47,7 +47,7 @@ const TransactionHistoryView = () => {
         <FaCoins size={40} color="white" />
       </div>
       <div className="flex-1 flex flex-col">
-        <p className="text-white text-sm font-bold">{`Package ${item?.package?.point} points`}</p>
+        <p className="text-white text-sm font-bold">{language === "en" ? `Package ${item?.package?.point} points` : item?.package?.description}</p>
         <p className="text-white text-lg font-bold">{CurrencyFormat(item?.totalPrice)}</p>
         <div className="flex justify-between items-center w-full">
           <span className={`text-sm font-bold ${item?.status ? "text-green-400" : "text-red-500"}`}>
@@ -73,7 +73,7 @@ const TransactionHistoryView = () => {
         )}
       </div>
       <div className="flex-1 flex flex-col">
-        <p className="text-white text-lg font-bold">{item?.topic?.name || localStrings.Transaction.TopupPoint}</p>
+        <p className="text-white text-lg font-bold">{localStrings?.Topics?.[item?.topic?.code as keyof typeof localStrings.Topics] || localStrings.Transaction.TopupPoint}</p>
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center">
             <span className={`text-lg font-bold ${item?.action ? "text-green-400" : "text-red-500"}`}>

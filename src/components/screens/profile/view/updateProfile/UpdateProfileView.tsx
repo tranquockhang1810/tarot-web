@@ -9,6 +9,7 @@ import { RcFile } from "antd/es/upload";
 import { showToast } from "@/utils/helper/SendMessage";
 import { IoLogOut } from "react-icons/io5";
 import { GrLanguage } from "react-icons/gr";
+import { AVARTAR_IMAGE } from '@/consts/ImgPath';
 
 const UpdateProfileView = ({
   open,
@@ -85,7 +86,7 @@ const UpdateProfileView = ({
           >
             <div className="relative w-36 h-36 mx-auto mb-4">
               <Image
-                src={imageUrl || user?.avatar}
+                src={imageUrl || user?.avatar || AVARTAR_IMAGE}
                 className="rounded-full border-4"
                 style={{ borderColor: 'white', objectFit: 'cover' }}
                 preview={editMode ? false : { mask: null }}

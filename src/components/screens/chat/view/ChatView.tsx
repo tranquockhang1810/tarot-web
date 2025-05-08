@@ -10,8 +10,17 @@ import dayjs from 'dayjs';
 import ChatDetailModal from "./detail/ChatDetail";
 import { FaCircleInfo } from "react-icons/fa6";
 import { showToast } from "@/utils/helper/SendMessage";
+import { IoIosArrowBack } from "react-icons/io";
 
-const ChatScreen = ({ chatId }: { chatId: string }) => {
+const ChatScreen = ({
+  chatId,
+  listCollapsed,
+  setListCollapsed
+}: {
+  chatId: string,
+  listCollapsed: boolean,
+  setListCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+}) => {
   const { localStrings } = useAuth();
   const { brandPrimary, violet, brandPrimaryTap } = useColor();
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -55,6 +64,7 @@ const ChatScreen = ({ chatId }: { chatId: string }) => {
         style={{ backgroundColor: violet }}
       >
         <div className="flex items-center">
+          {listCollapsed && <Button type="text" icon={<IoIosArrowBack size={20} color="white" />} onClick={() => setListCollapsed((prev) => !prev)} />}
           <Image
             preview={false}
             src={`${process.env.NEXT_PUBLIC_SERVER_ENDPOINT! + chatInfo?.topic?.image}`}
@@ -67,7 +77,6 @@ const ChatScreen = ({ chatId }: { chatId: string }) => {
             {chatInfo?.topic?.name || "Chat"}
             <span className="text-xs opacity-60">{dayjs(chatInfo?.createdAt).format("DD/MM/YYYY")}</span>
           </div>
-
         </div>
         <FaCircleInfo size={20} color="white" className="ml-2 cursor-pointer" onClick={() => setDetailShow(true)} />
       </div>

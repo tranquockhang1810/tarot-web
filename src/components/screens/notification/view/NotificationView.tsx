@@ -77,7 +77,7 @@ const NotificationView = () => {
                   }
                   description={
                     <div style={{ color: "white" }} className="flex flex-row justify-between">
-                      <span>{item.description}</span>
+                      <span className="truncate">{item.description}</span> 
                       <span className="text-xs mt-1">{dayjs(item?.createdAt).format("HH:mm DD/MM/YYYY")}</span>
                     </div>
                   }

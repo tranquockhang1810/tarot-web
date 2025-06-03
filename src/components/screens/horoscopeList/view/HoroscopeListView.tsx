@@ -16,7 +16,7 @@ const HoroscopeListView = () => {
   const isMdUp = useMediaQuery({ minWidth: 768 });
   const { brandPrimaryRGB, blue, brandPrimaryTap } = useColor();
   const { list, loading, resultObject } = HoroscopeListViewModel();
-  const [selectedHoroscope, setSelectedHoroscope] = useState<HoroscopeResponseModel | undefined>(undefined);
+  const [selectedHoroscope, setSelectedHoroscope] = useState<HoroscopeResponseModel | undefined>(list?.[0]);
 
   useEffect(() => {
     if (resultObject?.type) {

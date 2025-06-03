@@ -21,7 +21,7 @@ const RegisterView = () => {
   const search = useSearchParams();
   const type = search.get('type');
   const phone = search.get('phone');
-  const facebookId = search.get('id');
+  const facebookId = search.get('facebookId');
   const name = search.get('name');
 
   useEffect(() => {

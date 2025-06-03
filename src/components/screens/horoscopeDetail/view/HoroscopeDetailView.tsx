@@ -1,10 +1,6 @@
 import { useAuth } from "@/context/auth/useAuth";
 import useColor from "@/hooks/useColor";
-import { showToast } from "@/utils/helper/SendMessage";
-import { Spin, Image } from "antd";
 import dayjs from "dayjs";
-import { useEffect } from "react";
-import HoroscopeDetailViewModel from "../viewModel/HoroscopeDetailViewModel";
 import {
   AiFillStar,
   AiFillHeart
@@ -15,28 +11,11 @@ import {
   MdMedicalServices
 } from "react-icons/md";
 import { GiClover } from "react-icons/gi";
+import { HoroscopeResponseModel } from "@/api/features/horoscope/models/HoroscopeModel";
 
-const HoroscopeDetailView = ({ date, className }: { date: string, className?: string }) => {
+const HoroscopeDetailView = ({ horoscope, className }: { horoscope?: HoroscopeResponseModel, className?: string }) => {
   const { localStrings } = useAuth();
   const { redError, brandPrimary, blue } = useColor();
-  const { horoscope, loading, resultObject } = HoroscopeDetailViewModel(date);
-
-  useEffect(() => {
-    if (resultObject?.type) {
-      showToast({
-        type: resultObject?.type,
-        content: resultObject?.content,
-      });
-    }
-  }, [resultObject]);
-
-  if (loading || !horoscope) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Spin size="large" />
-      </div>
-    );
-  }
 
   return (
     <div className={`${className} w-full flex flex-col items-center"`}>
@@ -46,7 +25,7 @@ const HoroscopeDetailView = ({ date, className }: { date: string, className?: st
         style={{ backgroundColor: brandPrimary }}
       >
         <h1 className="text-white font-bold text-lg text-center md:text-start flex-1">
-          {`${horoscope?.zodiac} - ${dayjs(date).format("DD/MM/YYYY")}`}
+          {`${horoscope?.zodiac} - ${dayjs(horoscope?.date).format("DD/MM/YYYY")}`}
         </h1>
 
         {/* Title */}

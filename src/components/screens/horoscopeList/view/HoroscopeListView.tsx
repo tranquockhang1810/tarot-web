@@ -9,13 +9,14 @@ import dayjs from 'dayjs';
 import { showToast } from '@/utils/helper/SendMessage';
 import { useMediaQuery } from 'react-responsive';
 import HoroscopeDetailView from '../../horoscopeDetail/view/HoroscopeDetailView';
+import { HoroscopeResponseModel } from '@/api/features/horoscope/models/HoroscopeModel';
 
 const HoroscopeListView = () => {
   const { localStrings } = useAuth();
   const isMdUp = useMediaQuery({ minWidth: 768 });
   const { brandPrimaryRGB, blue, brandPrimaryTap } = useColor();
   const { list, loading, resultObject } = HoroscopeListViewModel();
-  const [selectedHoroscope, setSelectedHoroscope] = useState<string | undefined>(dayjs().format('YYYY-MM-DD'));
+  const [selectedHoroscope, setSelectedHoroscope] = useState<HoroscopeResponseModel | undefined>(undefined);
 
   useEffect(() => {
     if (resultObject?.type) {
@@ -67,7 +68,7 @@ const HoroscopeListView = () => {
                       xs={24} md={7}
                       className="p-5 rounded-lg cursor-pointer"
                       style={{ backgroundColor: brandPrimaryRGB(0.8), borderWidth: selectedHoroscope === itemDate ? 5 : 0, borderColor: brandPrimaryTap }}
-                      onClick={() => setSelectedHoroscope(itemDate)}
+                      onClick={() => setSelectedHoroscope(item)}
                     >
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-white text-lg font-bold">
@@ -82,8 +83,8 @@ const HoroscopeListView = () => {
                       </div>
                     </Col>
 
-                    {!isMdUp && selectedHoroscope === itemDate && (
-                      <HoroscopeDetailView date={selectedHoroscope} />
+                    {!isMdUp && dayjs(selectedHoroscope?.date).format('YYYY-MM-DD') === itemDate && (
+                      <HoroscopeDetailView horoscope={selectedHoroscope} />
                     )}
                   </React.Fragment>
                 )
@@ -92,7 +93,7 @@ const HoroscopeListView = () => {
 
             {/* Chi tiet Horoscope */}
             {isMdUp && selectedHoroscope && (
-              <HoroscopeDetailView date={selectedHoroscope} className='mt-4'/>
+              <HoroscopeDetailView horoscope={selectedHoroscope} className='mt-4' />
             )}
           </>
         )}

@@ -61,13 +61,12 @@ const HoroscopeListView = () => {
             {/* Danh sách Horoscope */}
             <Row gutter={[0, 32]} justify={"space-between"} className='w-full'>
               {list?.map((item, index) => {
-                const itemDate = dayjs(item?.date).format('YYYY-MM-DD');
                 return (
                   <React.Fragment key={item?._id}>
                     <Col
                       xs={24} md={7}
                       className="p-5 rounded-lg cursor-pointer"
-                      style={{ backgroundColor: brandPrimaryRGB(0.8), borderWidth: selectedHoroscope === itemDate ? 5 : 0, borderColor: brandPrimaryTap }}
+                      style={{ backgroundColor: brandPrimaryRGB(0.8), borderWidth: selectedHoroscope?._id === item?._id ? 5 : 0, borderColor: brandPrimaryTap }}
                       onClick={() => setSelectedHoroscope(item)}
                     >
                       <div className="flex justify-between items-center mb-2">
@@ -83,7 +82,7 @@ const HoroscopeListView = () => {
                       </div>
                     </Col>
 
-                    {!isMdUp && dayjs(selectedHoroscope?.date).format('YYYY-MM-DD') === itemDate && (
+                    {!isMdUp && selectedHoroscope?._id === item?._id && (
                       <HoroscopeDetailView horoscope={selectedHoroscope} />
                     )}
                   </React.Fragment>

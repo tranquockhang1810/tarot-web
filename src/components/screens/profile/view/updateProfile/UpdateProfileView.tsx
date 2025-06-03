@@ -75,8 +75,21 @@ const UpdateProfileView = ({
           className="flex items-center justify-center"
         >
           <Upload
+            accept="image/*"
             showUploadList={false}
-            beforeUpload={() => false}
+            beforeUpload={(file) => {
+              const isImage = file.type.startsWith('image/');
+              if (!isImage) {
+                showToast({
+                  type: 'error',
+                  content: localStrings?.GLobals?.InvalidImage || 'File không hợp lệ. Vui lòng chọn ảnh.',
+                });
+                return Upload.LIST_IGNORE;
+              }
+              const previewUrl = URL.createObjectURL(file as RcFile);
+              setImageUrl(previewUrl);
+              return false;
+            }}
             onChange={(info) => {
               const { file } = info;
               const previewUrl = URL.createObjectURL(file as RcFile);

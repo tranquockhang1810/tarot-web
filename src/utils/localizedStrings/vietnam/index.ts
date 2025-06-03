@@ -32,6 +32,7 @@ export const VnLocalizedStrings = {
     Edit: "Chỉnh sửa",
     Success: "Thành công",
     Failed: "Thất bại",
+    InvalidImage: "File không hợp lệ. Vui lòng chọn ảnh."
   },
   Topics: {
     health: "Sức khỏe",

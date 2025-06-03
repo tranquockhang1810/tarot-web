@@ -32,6 +32,7 @@ export const ENGLocalizedStrings = {
     Edit: "Edit",
     Success: "Success",
     Failed: "Failed",
+    InvalidImage: "Invalid file. Please select an image."
   },
   Topics: {
     health: "Health",

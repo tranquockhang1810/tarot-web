@@ -15,7 +15,7 @@ const CardViewModel = (id: string) => {
 
   const handlePlaceCard = (slotIndex: number) => {
     if (selectedCard === null) return;
-    if (placedCards.every((card) => card !== null)) return;
+    if (placedCards.every((card) => card !== null || placedCards[slotIndex] !== null)) return;
 
     const selectedCardObj = remainingCards[selectedCard];
     setRemainingCards((prev) => prev.filter((_, i) => i !== selectedCard));

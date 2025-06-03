@@ -129,7 +129,7 @@ const ChatViewModel = (chatID: string) => {
   }, [newChatId, chatID, chatInfo])
 
   useEffect(() => {
-    if (chatInfo && chatInfo?.cards && chatInfo?.cards?.length < 3) {
+    if (chatInfo && chatInfo?.status && chatInfo?.cards && chatInfo?.cards?.length < 3) {
       router.replace(`/create/${chatID}`);
     }
   }, [chatID, chatInfo])
